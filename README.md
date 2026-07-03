@@ -11,7 +11,7 @@ Run Roblox's stock **Animate** `LocalScript` on client-owned characters (NPCs fr
 ```toml
 # wally.toml
 [dependencies]
-AnimateBootstrapper = "v6fire/animatebootstrapper@0.1.1"
+AnimateBootstrapper = "v6fire/animatebootstrapper@0.1.2"
 ```
 
 ```bash
@@ -101,7 +101,7 @@ This calls `ClearAllChildren()` on the clone before inserting your instances. A 
 This repo includes a demo place for local testing:
 
 ```bash
-rojo serve
+rojo serve examples.project.json
 ```
 
 | Path | Purpose |
