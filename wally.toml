@@ -1,5 +1,5 @@
 [package]
-name = "v6FiRE/animatebootstrapper"
+name = "v6fire/animatebootstrapper"
 description = "Run Roblox's stock Animate LocalScript without forking it."
 version = "0.1.0"
 registry = "https://github.com/upliftgames/wally-index"
