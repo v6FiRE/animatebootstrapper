@@ -29,9 +29,15 @@ Adjust the require path to match your Rojo `Packages` layout.
 
 The Animate `LocalScript` you clone **must be created on the server and replicated to the client**. A `LocalScript` bundled with a client-created model from `CreateHumanoidModelFromDescriptionAsync` will misbehave in live games (works in Studio, fails in Live).
 
-Create template Animate scripts on the server and parent them to `ReplicatedStorage` (or similar). See [`examples/server`](examples/server) for one approach.
+This package does not create or name those templates for you. Your game is responsible for:
 
-For background on this replication issue, see the [DevForum thread](https://devforum.roblox.com/t/studio-vs-live-server-discrepancy-failure-with-animate-script-generated-by-createhumanoidmodelfromdescriptionasync/4685167).
+1. Creating stock Animate `LocalScript`s on the **server** (one per rig type you need).
+2. Replicating them to the client (e.g. `ReplicatedStorage`, a folder, or another container you already use for assets).
+3. Passing the appropriate template into `BootstrapAnimate` from client code.
+
+See [`examples/server`](examples/server) for one demo approach — the instance names there (`BaseAnimateR6`, `BaseAnimateR15`) are **example-place conventions**, not part of this library's API.
+
+For background on the replication issue, see the [DevForum thread](https://devforum.roblox.com/t/studio-vs-live-server-discrepancy-failure-with-animate-script-generated-by-createhumanoidmodelfromdescriptionasync/4685167).
 
 ## Usage
 
@@ -41,13 +47,14 @@ Bootstrap **before** parenting the character into `workspace` (or anywhere visib
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local AnimateBootstrapper = require(ReplicatedStorage.Packages.AnimateBootstrapper)
 
-local baseAnimate = ReplicatedStorage:WaitForChild("BaseAnimateR15") :: LocalScript
+-- A server-replicated stock Animate LocalScript from your game's setup (see above).
+local animateTemplate: LocalScript = ...
 
-local npc = -- ... your client-owned character model with Humanoid + Animator
+local character: Model = ... -- Humanoid + Animator; not yet parented to workspace
 
-AnimateBootstrapper.BootstrapAnimate(npc, baseAnimate)
+AnimateBootstrapper.BootstrapAnimate(character, animateTemplate)
 
-npc.Parent = workspace
+character.Parent = workspace
 ```
 
 ### Custom animation children
@@ -55,10 +62,10 @@ npc.Parent = workspace
 Pass a third argument to replace all children of the cloned Animate script (animation instances, etc.):
 
 ```luau
-AnimateBootstrapper.BootstrapAnimate(npc, baseAnimate, customAnimateChildren)
+AnimateBootstrapper.BootstrapAnimate(character, animateTemplate, customAnimateChildren)
 ```
 
-This calls `ClearAllChildren()` on the clone before inserting your instances.
+This calls `ClearAllChildren()` on the clone before inserting your instances. A common pattern when using `CreateHumanoidModelFromDescriptionAsync` is to remove the client-bundled Animate script and pass its children here while cloning a server-replicated template for the script itself.
 
 ## API
 
@@ -91,7 +98,7 @@ This calls `ClearAllChildren()` on the clone before inserting your instances.
 
 ## Examples
 
-This repo includes a full demo place:
+This repo includes a demo place for local testing:
 
 ```bash
 rojo serve
@@ -99,14 +106,10 @@ rojo serve
 
 | Path | Purpose |
 |------|---------|
-| [`examples/server`](examples/server) | Creates `BaseAnimateR6` / `BaseAnimateR15` in `ReplicatedStorage` |
-| [`examples/client`](examples/client) | Spawns NPCs, bootstraps Animate, parents to `workspace` |
+| [`examples/server`](examples/server) | Demo server setup that extracts stock Animate scripts and replicates them |
+| [`examples/client`](examples/client) | Demo client that spawns NPCs, bootstraps Animate, and parents to `workspace` |
 
-The client example includes a `VerifyReplication` remote that demonstrates how to detect client-only instances at a network boundary. It is demo scaffolding, not a production replication check.
-
-## Acknowledgments
-
-README drafted with assistance from [Cursor](https://cursor.com).
+The examples include extra scaffolding (template naming, a `VerifyReplication` remote, NPC spawning) that illustrates one end-to-end workflow. Copy the patterns that fit your game; you do not need to match the demo names or remotes to use the package.
 
 ## License
 
