@@ -11,7 +11,7 @@ Run Roblox's stock **Animate** `LocalScript` on client-owned characters (NPCs fr
 ```toml
 # wally.toml
 [dependencies]
-AnimateBootstrapper = "v6fire/animatebootstrapper@0.1.2"
+animatebootstrapper = "v6fire/animatebootstrapper@0.1.2"
 ```
 
 ```bash
