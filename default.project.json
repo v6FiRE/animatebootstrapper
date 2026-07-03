@@ -1,0 +1,27 @@
+{
+  "name": "AnimateBootstrapperTesting",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "AnimateBootstrapper": {
+        "$path": "src"
+      },
+      "VerifyReplication": {
+        "$className": "RemoteFunction"
+        
+      }
+    },
+    "ServerScriptService": {
+      "ServerExamples": {
+        "$path": "examples/server"
+      }
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "ClientExamples": {
+          "$path": "examples/client"
+        }
+      }
+    }
+  }
+}
