@@ -22,7 +22,6 @@ const function loopMoveRandomly(npc: Model)
 	end
 end
 
--- Usage Example:
 const function animateNPC(npc: Model, animateScript: LocalScript, replacementAnimateChildren: { Instance }?)
 	if not isServerReplicated(animateScript) then
 		error(
@@ -54,10 +53,7 @@ const function initSelfNPC()
 	selfAnimateScript.Parent = nil
 
 	-- Animate script children are character animations, so we replace the base animations with our own.
-	const bootstrappedAnimate = animateNPC(npc, baseAnimateScript, selfAnimateScript:GetChildren())
-	npc.Destroying:Once(function()
-		bootstrappedAnimate:Destroy()
-	end)
+	animateNPC(npc, baseAnimateScript, selfAnimateScript:GetChildren())
 
 	npc.Parent = workspace
 	task.spawn(loopMoveRandomly, npc)
