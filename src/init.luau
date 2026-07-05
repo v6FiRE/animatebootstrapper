@@ -30,8 +30,8 @@ const BOOTSTRAP_TIMEOUT_SECONDS = 3
 
 -- Waits for stock Animate's first idle on this Animator (R6/R15 startup order).
 -- Resumes on AnimationPlayed or errors after BOOTSTRAP_TIMEOUT_SECONDS.
--- Do not short-circuit on pre-existing tracks (rebootstrap may leave stale locomotion).
-const function _waitForAnimationExecution(animator: Animator)
+-- `startAnimate` runs after the listener is connected so the first play is not missed.
+const function _waitForAnimationExecution(animator: Animator, startAnimate: () -> ())
 	local thread = coroutine.running()
 	local outcome: "played" | "timeout"? = nil
 
@@ -54,7 +54,9 @@ const function _waitForAnimationExecution(animator: Animator)
 		task.spawn(thread)
 	end)
 
-	coroutine.yield() -- suspended until one of the above resumes us
+	startAnimate()
+
+	coroutine.yield()
 
 	if outcome == "timeout" then
 		error(
@@ -85,13 +87,15 @@ end
     @param characterToAnimate The character model to animate.
     @param serverReplicatedAnimate The server-replicated Animate script to clone. Must be server-replicated; package does not verify.
     @param replacementAnimateChildren An optional table of instances to replace the children of the Animate script with. ClearAllChildren() replaces all children.
+    @param cloneReplacementChildren When true, each replacement child is `:Clone()`'d onto the bootstrapped script (source instances are untouched). Default false reparents instances (forum NPC pattern).
     @return Returned for advanced use; destroyed automatically when the character is destroyed unless already removed.
     @error Throws if Humanoid/Animator missing, or Animate does not start within BOOTSTRAP_TIMEOUT_SECONDS.
 ]]
 function AnimateBootstrapper.BootstrapAnimate(
 	characterToAnimate: Model,
 	serverReplicatedAnimate: LocalScript,
-	replacementAnimateChildren: { Instance }?
+	replacementAnimateChildren: { Instance }?,
+	cloneReplacementChildren: boolean?
 ): LocalScript
 	if RunService:IsServer() then
 		error("AnimateBootstrapper cannot be used on the server!")
@@ -110,8 +114,14 @@ function AnimateBootstrapper.BootstrapAnimate(
 
 	if replacementAnimateChildren then
 		animate:ClearAllChildren()
-		for _, child in replacementAnimateChildren do
-			child.Parent = animate
+		if cloneReplacementChildren then
+			for _, child in replacementAnimateChildren do
+				child:Clone().Parent = animate
+			end
+		else
+			for _, child in replacementAnimateChildren do
+				child.Parent = animate
+			end
 		end
 	end
 
@@ -126,9 +136,9 @@ function AnimateBootstrapper.BootstrapAnimate(
 		for _, track in animator:GetPlayingAnimationTracks() do
 			track:Stop(0)
 		end
-		-- Move the Animate script to the character to initialize execution.
-		animate.Parent = characterToAnimate
-		_waitForAnimationExecution(animator)
+		_waitForAnimationExecution(animator, function()
+			animate.Parent = characterToAnimate
+		end)
 
 		-- Park the script under PlayerScripts so it keeps running when the model is in
 		-- workspace (LocalScripts on workspace NPCs do not run). Stock Animate reads
