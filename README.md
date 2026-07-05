@@ -11,7 +11,7 @@ Run Roblox's stock **Animate** `LocalScript` on client-owned characters (NPCs fr
 ```toml
 # wally.toml
 [dependencies]
-animatebootstrapper = "v6fire/animatebootstrapper@0.1.2"
+animatebootstrapper = "v6fire/animatebootstrapper@0.1.3"
 ```
 
 ```bash
@@ -94,7 +94,12 @@ A common pattern when using `CreateHumanoidModelFromDescriptionAsync` is to read
 - **Bootstrap before showing** — reparenting during bootstrap can cause a visible flash.
 - **Other LocalScripts on the character** — any `LocalScript` descendant of the model may also run during bootstrap.
 - **Stock Animate coupling** — after idle starts, the script is moved to `PlayerScripts` because stock Animate caches `Humanoid`/`Animator` at startup. This relies on unmodified Roblox Animate behavior.
+- **Rebootstrap** — `BootstrapAnimate` stops existing locomotion tracks on the target `Animator` before starting a new Animate instance. Pass animation children via the third argument; each is cloned so a parked or onboard source can be destroyed after bootstrap.
 - **R6 and R15** — tested against default Roblox Animate scripts for both rig types.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## Examples
 
