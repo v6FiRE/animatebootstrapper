@@ -86,16 +86,14 @@ end
     @yields
     @param characterToAnimate The character model to animate.
     @param serverReplicatedAnimate The server-replicated Animate script to clone. Must be server-replicated; package does not verify.
-    @param replacementAnimateChildren An optional table of instances to replace the children of the Animate script with. ClearAllChildren() replaces all children.
-    @param cloneReplacementChildren When true, each replacement child is `:Clone()`'d onto the bootstrapped script (source instances are untouched). Default false reparents instances (forum NPC pattern).
+    @param replacementAnimateChildren Optional animation payload; each entry is `:Clone()`'d onto the bootstrapped script (sources are left untouched).
     @return Returned for advanced use; destroyed automatically when the character is destroyed unless already removed.
     @error Throws if Humanoid/Animator missing, or Animate does not start within BOOTSTRAP_TIMEOUT_SECONDS.
 ]]
 function AnimateBootstrapper.BootstrapAnimate(
 	characterToAnimate: Model,
 	serverReplicatedAnimate: LocalScript,
-	replacementAnimateChildren: { Instance }?,
-	cloneReplacementChildren: boolean?
+	replacementAnimateChildren: { Instance }?
 ): LocalScript
 	if RunService:IsServer() then
 		error("AnimateBootstrapper cannot be used on the server!")
@@ -114,14 +112,8 @@ function AnimateBootstrapper.BootstrapAnimate(
 
 	if replacementAnimateChildren then
 		animate:ClearAllChildren()
-		if cloneReplacementChildren then
-			for _, child in replacementAnimateChildren do
-				child:Clone().Parent = animate
-			end
-		else
-			for _, child in replacementAnimateChildren do
-				child.Parent = animate
-			end
+		for _, child in replacementAnimateChildren do
+			child:Clone().Parent = animate
 		end
 	end
 

@@ -59,13 +59,13 @@ character.Parent = workspace
 
 ### Custom animation children
 
-Pass a third argument to replace all children of the cloned Animate script (animation instances, etc.):
+Pass a third argument to copy animation children onto the cloned Animate script (each child is `:Clone()`'d; sources are untouched):
 
 ```luau
-AnimateBootstrapper.BootstrapAnimate(character, animateTemplate, customAnimateChildren)
+AnimateBootstrapper.BootstrapAnimate(character, animateTemplate, sourceAnimate:GetChildren())
 ```
 
-This calls `ClearAllChildren()` on the clone before inserting your instances. A common pattern when using `CreateHumanoidModelFromDescriptionAsync` is to remove the client-bundled Animate script and pass its children here while cloning a server-replicated template for the script itself.
+A common pattern when using `CreateHumanoidModelFromDescriptionAsync` is to read children from the client-bundled Animate, destroy that script, then pass the child list while cloning a server-replicated template for the script itself.
 
 ## API
 
@@ -75,7 +75,7 @@ This calls `ClearAllChildren()` on the clone before inserting your instances. A 
 |-----------|-------------|
 | `character` | `Model` with a `Humanoid` and `Animator` |
 | `animateScript` | Server-replicated stock Animate `LocalScript` to clone |
-| `replacementChildren` | Optional `{ Instance }` — replaces all children of the clone |
+| `replacementChildren` | Optional `{ Instance }` — cloned onto the bootstrapped Animate (`ClearAllChildren()` first) |
 
 **Returns:** The bootstrapped Animate `LocalScript`. Destroyed automatically when `character` is destroyed.
 

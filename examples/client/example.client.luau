@@ -49,11 +49,11 @@ const function initSelfNPC()
 	const npc, selfAnimateScript, rigType = createSelfNPC()
 	local baseAnimateScript = ReplicatedStorage:WaitForChild(`BaseAnimate{rigType.Name}`) :: LocalScript
 
-	-- Remove the client-created Animate script, otherwise it will error in the live game and run in studio.
-	selfAnimateScript.Parent = nil
+	const payload = selfAnimateScript:GetChildren()
+	animateNPC(npc, baseAnimateScript, payload)
 
-	-- Animate script children are character animations, so we replace the base animations with our own.
-	animateNPC(npc, baseAnimateScript, selfAnimateScript:GetChildren())
+	-- Client-bundled Animate must not remain on the model in live games.
+	selfAnimateScript:Destroy()
 
 	npc.Parent = workspace
 	task.spawn(loopMoveRandomly, npc)
