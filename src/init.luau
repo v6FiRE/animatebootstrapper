@@ -30,11 +30,8 @@ const BOOTSTRAP_TIMEOUT_SECONDS = 3
 
 -- Waits for stock Animate's first idle on this Animator (R6/R15 startup order).
 -- Resumes on AnimationPlayed or errors after BOOTSTRAP_TIMEOUT_SECONDS.
+-- Do not short-circuit on pre-existing tracks (rebootstrap may leave stale locomotion).
 const function _waitForAnimationExecution(animator: Animator)
-	if #animator:GetPlayingAnimationTracks() > 0 then
-		return
-	end
-
 	local thread = coroutine.running()
 	local outcome: "played" | "timeout"? = nil
 
@@ -126,6 +123,9 @@ function AnimateBootstrapper.BootstrapAnimate(
 	end
 
     const ok, err = pcall(function()
+		for _, track in animator:GetPlayingAnimationTracks() do
+			track:Stop(0)
+		end
 		-- Move the Animate script to the character to initialize execution.
 		animate.Parent = characterToAnimate
 		_waitForAnimationExecution(animator)
